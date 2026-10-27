@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Next.js Macro Ecosystem Command Center Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: beast-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_SYSTEM_BUS_URL=http://backend:8080
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - beast-network
+
+  # Python AI Agent & System Bus Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: beast-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GCP_PROJECT_ID=beast-system-511916
+    volumes:
+      - ./backend:/app/backend
+      - ./scripts:/app/scripts
+    networks:
+      - beast-network
+
+networks:
+  beast-network:
+    driver: bridge
